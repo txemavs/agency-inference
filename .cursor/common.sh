@@ -39,7 +39,11 @@ ensure_docker_installed() {
   echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu ${codename} stable" \
     | sudo tee /etc/apt/sources.list.d/docker.list >/dev/null
   sudo apt-get update -qq
+  # --force-conf{def,old} avoids the interactive /etc/fuse.conf conffile prompt
+  # (DEBIAN_FRONTEND alone does not control dpkg conffile prompts).
   sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq \
+    -o Dpkg::Options::=--force-confdef \
+    -o Dpkg::Options::=--force-confold \
     docker-ce docker-ce-cli containerd.io docker-buildx-plugin \
     docker-compose-plugin fuse-overlayfs
 }
