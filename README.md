@@ -89,6 +89,21 @@ docker compose --profile ollama --profile vllm up -d
 - Ollama: `http://localhost:11434`
 - vLLM: `http://localhost:8000/v1`
 
+### 5. Sin GPU (CPU-only) / GPU-less hosts
+
+Para máquinas sin GPU NVIDIA (CI, portátiles, VMs) usa el override
+`docker-compose.cpu.yml`, que elimina la reserva de GPU y ejecuta Ollama en CPU:
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.cpu.yml \
+  --profile ollama up -d
+docker exec -it inference-ollama ollama pull llama3.2:1b
+curl http://localhost:11434/api/generate \
+  -d '{"model":"llama3.2:1b","prompt":"hola","stream":false}'
+```
+
+> vLLM requiere GPU y no se cubre en modo CPU.
+
 ---
 
 ## Red y Seguridad / Network & Security
@@ -135,8 +150,10 @@ Host: mi-pc-gpu.local:8000   (vLLM)
 
 ```
 .
-├── docker-compose.yml   # Perfiles: ollama, vllm
-├── .env.example         # Template de configuración
+├── docker-compose.yml       # Perfiles: ollama, vllm (GPU)
+├── docker-compose.cpu.yml   # Override CPU-only (sin GPU)
+├── .cursor/                 # Entorno para Cursor Cloud Agents
+├── .env.example             # Template de configuración
 ├── .gitignore
 └── README.md
 ```

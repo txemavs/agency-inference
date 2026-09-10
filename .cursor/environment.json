@@ -1,0 +1,13 @@
+{
+  "name": "agency-inference",
+  "user": "ubuntu",
+  "install": "bash .cursor/install.sh",
+  "start": "bash .cursor/start.sh",
+  "terminals": [
+    {
+      "name": "ollama-logs",
+      "command": "sudo docker logs -f inference-ollama"
+    }
+  ],
+  "ports": [11434]
+}
