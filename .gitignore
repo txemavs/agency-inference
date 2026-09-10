@@ -1,0 +1,25 @@
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Model caches (if using local paths instead of Docker volumes)
+ollama-models/
+hf-models/
+*.gguf
+*.bin
+*.safetensors
+
+# Docker
+.docker/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
