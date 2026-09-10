@@ -1,0 +1,23 @@
+# ─────────────────────────────────────────────────────────────
+# CPU-only override for hosts without an NVIDIA GPU.
+#
+# The base docker-compose.yml reserves an NVIDIA device, which fails to
+# start on machines without a GPU + NVIDIA Container Toolkit (e.g. CI,
+# laptops, Cloud Agent VMs). This override drops the GPU reservation so
+# Ollama runs on CPU. vLLM is GPU-only and is intentionally not covered.
+#
+# Usage:
+#   docker compose -f docker-compose.yml -f docker-compose.cpu.yml \
+#     --profile ollama up -d
+# ─────────────────────────────────────────────────────────────
+services:
+  ollama:
+    # Host networking avoids the docker bridge NAT, which is unreliable inside
+    # nested/rootless container VMs (CI, Cloud Agents) where outbound
+    # masquerading for the bridge network may not work. On a normal host this
+    # simply binds Ollama to OLLAMA_PORT directly.
+    network_mode: host
+    deploy:
+      resources:
+        reservations:
+          devices: !override []
