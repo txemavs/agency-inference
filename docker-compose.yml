@@ -55,6 +55,86 @@ services:
       retries: 3
       start_period: 60s
 
+  comfy:
+    image: yanwk/comfyui-boot:cu130-slim-v2
+    profiles:
+      - comfy
+    container_name: inference-comfy
+    ports:
+      - "${COMFY_PORT:-8188}:8188"
+    volumes:
+      - ${COMFY_MODELS:-comfy_models}:/root/ComfyUI/models
+      - ${COMFY_OUTPUT:-comfy_output}:/root/ComfyUI/output
+      - ${COMFY_INPUT:-comfy_input}:/root/ComfyUI/input
+      - ${COMFY_CUSTOM_NODES:-comfy_custom_nodes}:/root/ComfyUI/custom_nodes
+    environment:
+      - CLI_ARGS=${COMFY_EXTRA_ARGS:---listen 0.0.0.0 --port 8188}
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8188/system_stats"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 90s
+
+  voice:
+    image: dlaszlo/speech-service:gpu-latest
+    profiles:
+      - voice
+    container_name: inference-voice
+    ports:
+      - "${VOICE_PORT:-5002}:8000"
+    volumes:
+      - ${VOICE_MODELS:-voice_models}:/data/huggingface
+    environment:
+      - STT_MODEL_NAME=${VOICE_STT_MODEL:-Systran/faster-whisper-large-v3}
+      - STT_COMPUTE_TYPE=${VOICE_STT_COMPUTE:-float16}
+      - TTS_MODEL_NAME=${VOICE_TTS_MODEL:-hexgrad/Kokoro-82M}
+      - TTS_LANG_CODE=${VOICE_TTS_LANG:-a}
+      - HF_HOME=/data/huggingface
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 120s
+
+  capabilities:
+    image: nginx:alpine
+    profiles:
+      - capabilities
+    container_name: inference-capabilities
+    ports:
+      - "${CAPABILITIES_PORT:-9090}:80"
+    volumes:
+      - ./capabilities.json:/usr/share/nginx/html/capabilities.json:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/capabilities.json"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
 volumes:
   ollama_data:
   vllm_data:
+  comfy_models:
+  comfy_output:
+  comfy_input:
+  comfy_custom_nodes:
+  voice_models:
