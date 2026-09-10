@@ -1,0 +1,53 @@
+{
+  "node": {
+    "name": "agency-inference",
+    "version": "1.0.0",
+    "description": "GPU-edge inference node for Agency"
+  },
+  "services": [
+    {
+      "id": "ollama",
+      "kind": "llm.ollama",
+      "name": "Ollama",
+      "description": "Local LLM inference with native Ollama API",
+      "port": 11434,
+      "base_url": "http://${HOST}:${OLLAMA_PORT:-11434}",
+      "health_path": "/api/tags",
+      "api_docs": "https://github.com/ollama/ollama/blob/main/docs/api.md"
+    },
+    {
+      "id": "vllm",
+      "kind": "llm.vllm",
+      "name": "vLLM",
+      "description": "High-throughput LLM serving with OpenAI-compatible API",
+      "port": 8000,
+      "base_url": "http://${HOST}:${VLLM_PORT:-8000}",
+      "health_path": "/v1/models",
+      "api_docs": "https://docs.vllm.ai/en/latest/serving/openai_compatible_server.html"
+    },
+    {
+      "id": "comfy",
+      "kind": "image.comfy",
+      "name": "ComfyUI",
+      "description": "Node-based image generation workflow engine",
+      "port": 8188,
+      "base_url": "http://${HOST}:${COMFY_PORT:-8188}",
+      "health_path": "/system_stats",
+      "api_docs": "https://github.com/comfyanonymous/ComfyUI"
+    },
+    {
+      "id": "voice",
+      "kind": "voice.stt_tts",
+      "name": "Voice (STT/TTS)",
+      "description": "Speech-to-text and text-to-speech with OpenAI-compatible API",
+      "port": 5002,
+      "base_url": "http://${HOST}:${VOICE_PORT:-5002}",
+      "health_path": "/health",
+      "endpoints": {
+        "transcriptions": "/v1/audio/transcriptions",
+        "speech": "/v1/audio/speech"
+      },
+      "api_docs": "https://hub.docker.com/r/dlaszlo/speech-service"
+    }
+  ]
+}
